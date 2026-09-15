@@ -1,0 +1,291 @@
+.dashboard-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   DASHBOARD HEADER
+   ======================================== */
+
+.dashboard-header {
+  margin-bottom: 28px;
+}
+
+.dashboard-eyebrow {
+  margin-bottom: 6px;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dashboard-header h1 {
+  margin: 0 0 8px;
+  color: var(--dark);
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.dashboard-header p:last-child {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   STATISTICS
+   ======================================== */
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    border-color var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(89, 92, 39, 0.2);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-secondary);
+}
+
+.stat-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.stat-card-content {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.stat-card-content span {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.stat-card-content strong {
+  margin: 5px 0;
+  color: var(--dark);
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.stat-card-content p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ========================================
+   DASHBOARD GRID
+   ======================================== */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.dashboard-card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-card-header {
+  margin-bottom: 16px;
+}
+
+.dashboard-card-header h2 {
+  margin: 0 0 4px;
+  color: var(--dark);
+  font-size: 17px;
+}
+
+.dashboard-card-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* ========================================
+   DASHBOARD LIST
+   ======================================== */
+
+.dashboard-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-list-item {
+  min-height: 64px;
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dashboard-list-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-list-item > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dashboard-list-item strong {
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.dashboard-list-item span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.dashboard-list-meta {
+  white-space: nowrap;
+  color: var(--brown);
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+
+.dashboard-empty-state {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+
+.dashboard-loading {
+  padding: 60px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   ERROR STATE
+   ======================================== */
+
+.dashboard-error {
+  padding: 40px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.dashboard-error h2 {
+  margin: 0 0 8px;
+  color: var(--dark);
+}
+
+.dashboard-error p {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+}
+
+.dashboard-error button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.dashboard-error button:hover {
+  background: var(--primary-dark);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1100px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header h1 {
+    font-size: 26px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-card,
+  .stat-card {
+    padding: 17px;
+  }
+
+  .dashboard-list-item {
+    align-items: flex-start;
+  }
+
+  .dashboard-list-meta {
+    font-size: 12px;
+  }
+
+  .dashboard-loading {
+    padding: 40px 20px;
+  }
+
+  .dashboard-error {
+    padding: 30px 20px;
+  }
+}
