@@ -1,5 +1,17 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { LayoutDashboard, CalendarCheck, ClipboardList, CheckSquare, CalendarDays, Megaphone, Bot, User, LogOut, Menu, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  ClipboardList,
+  CheckSquare,
+  CalendarDays,
+  Megaphone,
+  Bot,
+  User,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./AppLayout.css";
@@ -124,7 +136,14 @@ const AppLayout = () => {
 
           <div className="navbar-user">
             <div className="user-avatar">
-              {user?.name?.charAt(0).toUpperCase()}
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={`${user.name}'s profile`}
+                />
+              ) : (
+                user?.name?.charAt(0).toUpperCase()
+              )}
             </div>
 
             <div className="user-info">

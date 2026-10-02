@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
+  Camera,
   Check,
   KeyRound,
   LogOut,
@@ -7,6 +8,7 @@ import {
   Save,
   User,
   UserRound,
+  Trash2
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -14,6 +16,8 @@ import { useAuth } from "../context/AuthContext";
 import {
   changePassword,
   updateProfile,
+  uploadProfilePicture,
+  removeProfilePicture
 } from "../services/profileService";
 
 import "./Profile.css";
@@ -33,8 +37,11 @@ const Profile = () => {
   });
 
   const [savingProfile, setSavingProfile] = useState(false);
-  const [changingPassword, setChangingPassword] =
-    useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [removingAvatar, setRemovingAvatar] = useState(false);
+
+  const avatarInputRef = useRef(null);
 
   const getInitials = () => {
     if (!user?.name) return "U";
@@ -65,6 +72,120 @@ const Profile = () => {
     }));
   };
 
+  const openAvatarPicker = () => {
+    if (uploadingAvatar || removingAvatar) {
+      return;
+    }
+
+    avatarInputRef.current?.click();
+  };
+
+  // Upload or change profile picture
+  const handleAvatarSelect = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(
+        "Only JPG, PNG, and WebP images are allowed"
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(
+        "Profile picture must be 5 MB or smaller"
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingAvatar(true);
+
+      const data = await uploadProfilePicture(file);
+
+      updateUser(data.user);
+
+      toast.success(
+        "Profile picture updated successfully"
+      );
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      console.error(
+        "Backend response:",
+        error.response?.data
+      );
+
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to update profile picture"
+      );
+    } finally {
+      setUploadingAvatar(false);
+
+      // Allow selecting the same file again
+      event.target.value = "";
+    }
+  };
+
+  // Remove profile picture
+  const handleRemoveAvatar = async () => {
+    if (
+      !user?.avatar ||
+      removingAvatar ||
+      uploadingAvatar
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to remove your profile picture?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setRemovingAvatar(true);
+
+      const data = await removeProfilePicture();
+
+      updateUser(data.user);
+
+      toast.success(
+        "Profile picture removed successfully"
+      );
+    } catch (error) {
+      console.error("Remove avatar error:", error);
+      console.error(
+        "Backend response:",
+        error.response?.data
+      );
+
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to remove profile picture"
+      );
+    } finally {
+      setRemovingAvatar(false);
+    }
+  };
+
+  // Update personal information
   const handleProfileSubmit = async (event) => {
     event.preventDefault();
 
@@ -167,14 +288,68 @@ const Profile = () => {
 
       <div className="profile-layout">
         <aside className="profile-summary">
-          <div className="profile-avatar">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-              />
-            ) : (
-              getInitials()
+          {/* Profile Picture */}
+          <div className="profile-avatar-wrapper">
+            <button
+              type="button"
+              className="profile-avatar"
+              onClick={openAvatarPicker}
+              disabled={uploadingAvatar || removingAvatar}
+              aria-label="Change profile picture"
+            >
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name || "Profile"}
+                />
+              ) : (
+                getInitials()
+              )}
+
+              <span className="profile-avatar-overlay">
+                {uploadingAvatar ? (
+                  <span className="avatar-spinner" />
+                ) : (
+                  <Camera size={18} />
+                )}
+              </span>
+            </button>
+
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="profile-avatar-input"
+              onChange={handleAvatarSelect}
+              disabled={uploadingAvatar || removingAvatar}
+            />
+
+            <span className="profile-avatar-help">
+              {uploadingAvatar
+                ? "Uploading picture..."
+                : "Click your photo to change it"}
+            </span>
+
+            {/* Remove Profile Picture */}
+            {user?.avatar && (
+              <button
+                type="button"
+                className="profile-remove-avatar"
+                onClick={handleRemoveAvatar}
+                disabled={
+                  removingAvatar || uploadingAvatar
+                }
+              >
+                {removingAvatar ? (
+                  <span className="button-spinner" />
+                ) : (
+                  <Trash2 size={14} />
+                )}
+
+                {removingAvatar
+                  ? "Removing..."
+                  : "Remove profile picture"}
+              </button>
             )}
           </div>
 
@@ -193,6 +368,7 @@ const Profile = () => {
           <div className="profile-summary-divider" />
 
           <button
+            type="button"
             className="profile-logout-button"
             onClick={logout}
           >
@@ -222,7 +398,9 @@ const Profile = () => {
               onSubmit={handleProfileSubmit}
             >
               <div className="profile-form-group">
-                <label htmlFor="name">Full Name</label>
+                <label htmlFor="name">
+                  Full Name
+                </label>
 
                 <div className="profile-input-wrapper">
                   <User size={17} />
@@ -241,7 +419,9 @@ const Profile = () => {
               </div>
 
               <div className="profile-form-group">
-                <label htmlFor="email">Email Address</label>
+                <label htmlFor="email">
+                  Email Address
+                </label>
 
                 <div className="profile-input-wrapper">
                   <Mail size={17} />
@@ -351,7 +531,8 @@ const Profile = () => {
 
               <div className="profile-password-note">
                 <Check size={15} />
-                Password must contain at least 6 characters.
+                Password must contain at least 6
+                characters.
               </div>
 
               <div className="profile-form-actions">

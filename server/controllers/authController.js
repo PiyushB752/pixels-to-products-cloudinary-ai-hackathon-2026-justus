@@ -1,6 +1,80 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
+const cloudinary = require("../config/cloudinary");
+
+const uploadProfilePicture = async (req, res) => {
+  try {
+    // Make sure a file was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Profile picture is required",
+      });
+    }
+
+    // Upload image buffer to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "campusly/profile-pictures",
+          resource_type: "image",
+          transformation: [
+            {
+              width: 500,
+              height: 500,
+              crop: "fill",
+              gravity: "face",
+              quality: "auto",
+              fetch_format: "auto",
+            },
+          ],
+        },
+        (error, uploadedImage) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(uploadedImage);
+          }
+        }
+      );
+
+      uploadStream.end(req.file.buffer);
+    });
+
+    // Save Cloudinary URL in MongoDB
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        avatar: result.secure_url,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("_id name email avatar");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Profile picture upload error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to upload profile picture",
+    });
+  }
+};
 
 const register = async (req, res) => {
   try {
@@ -291,10 +365,54 @@ const changePassword = async (req, res) => {
   }
 };
 
+const removeProfilePicture = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.avatarPublicId) {
+      await cloudinary.uploader.destroy(user.avatarPublicId, {
+        resource_type: "image",
+      });
+    }
+
+    user.avatar = "";
+    user.avatarPublicId = "";
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture removed successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    console.error("Remove profile picture error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove profile picture",
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   updateProfile,
-  changePassword
+  changePassword,
+  uploadProfilePicture,
+  removeProfilePicture
 };

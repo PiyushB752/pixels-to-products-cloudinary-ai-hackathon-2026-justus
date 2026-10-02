@@ -42,7 +42,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (updatedUser) => {
-    setUser(updatedUser);
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return updatedUser;
+      }
+
+      return {
+        ...currentUser,
+        ...updatedUser,
+      };
+    });
   };
 
   const loadUser = async () => {
@@ -77,7 +86,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        updateUser
+        updateUser,
       }}
     >
       {children}
